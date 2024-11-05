@@ -30,6 +30,15 @@ The above code tells the npm run all command to run all the dev: commands. While
 
     pnpm dev
 
+**_An interface is a way to define a type in TypeScript_**
+
+    interface Message {
+        sender: string;
+        content: string;
+    }
+
+When you run a mutation it updates ALL queries automatically
+
 ### Convex Dashboard Tabs
 
 - Data (all saved data)

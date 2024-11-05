@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ConvexClientProvider } from "./convex-client-provider";
 
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
@@ -25,7 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ConvexClientProvider>{children}</ConvexClientProvider>
+      </body>
     </html>
   );
 }
