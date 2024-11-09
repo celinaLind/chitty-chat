@@ -1,6 +1,12 @@
 "use client";
 import { api } from "@/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { SignInButton } from "@clerk/nextjs";
+import {
+  Authenticated,
+  Unauthenticated,
+  useMutation,
+  useQuery,
+} from "convex/react";
 // by default typescript tries to run the code in the server
 // 'use client' tells typescript to run the code in the client
 // this is needed whenever you have interactive code that uses the DOM (Document Object Model)
@@ -22,22 +28,29 @@ export default function Home() {
   };
 
   return (
-    <div>
-      {messages?.map((message, index) => (
-        <div key={index}>
-          <strong>{message.sender}</strong>: {message.content}
+    <>
+      <Authenticated>
+        <div>
+          {messages?.map((message, index) => (
+            <div key={index}>
+              <strong>{message.sender}</strong>: {message.content}
+            </div>
+          ))}
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="message"
+              id="message"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button type="submit">Send</button>
+          </form>
         </div>
-      ))}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="message"
-          id="message"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button type="submit">Send</button>
-      </form>
-    </div>
+      </Authenticated>
+      <Unauthenticated>
+        <SignInButton />
+      </Unauthenticated>
+    </>
   );
 }

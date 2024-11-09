@@ -8,7 +8,8 @@
 ## Tools Used
 
 - [pnpm](https://pnpm.io/installation) => make a medium article of npm vs. pnpm
-- [Convex](https://www.convex.dev/)
+- [Convex](https://www.convex.dev/)`1 q
+- [Clerk](https://clerk.com/docs)
 
 ## Development Notes
 
