@@ -8,8 +8,9 @@
 ## Tools Used
 
 - [pnpm](https://pnpm.io/installation) => make a medium article of npm vs. pnpm
-- [Convex](https://www.convex.dev/)`1 q
+- [Convex](https://www.convex.dev/)
 - [Clerk](https://clerk.com/docs)
+- [svix]()
 
 ## Development Notes
 
@@ -51,3 +52,20 @@ When you run a mutation it updates ALL queries automatically
 ### Convex Folder
 
 - \_generated folder is updated automatically by convex to create types for our backend that can be used on our frontend
+
+### [Webhook Validation](https://clerk.com/docs/integrations/webhooks/overview?_gl=1*c4vk4p*_gcl_au*NDYyNDQxMjUxLjE3MzExMTkyNjc.*_ga*MTU1MjYwMTI2NC4xNzMxMTE5MjY3*_ga_1WMF5X234K*MTczMTExOTI2Ny4xLjEuMTczMTEyMDIxMy4wLjAuMA..)
+
+Install svix to handle webhook validation requests
+
+    pnpm add svix
+
+Do the following within Clerk:
+
+- Create new webhook
+- Add Endpoint Url found in convex under HTTP Actions Url
+- Add '/clerk-webhook' to the end of the url found above
+- Subscribe to ALL events you need (in this case 'user')
+
+Do following in Convex:
+
+- Add the "Signing Secret" found in clerk after webhook creation as CLERK_WEBHOOK_SECRET under env variables
