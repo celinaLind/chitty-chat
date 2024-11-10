@@ -7,35 +7,40 @@ import {
 } from "@/components/ui/tooltip";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { CheckIcon, Icon, MessageCircleIcon, X, XIcon } from "lucide-react";
 
-const useTestUsers = () => {
-  const user = useQuery(api.functions.user.get); // get current user
-
-  if (!user) {
-    return [];
-  }
-
-  return [user, user, user, user];
-};
 export function PendingFriendsList() {
-  const users = useTestUsers();
+  const friends = useQuery(api.functions.friend.listPending);
+  const updateStatus = useMutation(api.functions.friend.updateStatus);
 
   return (
     <div className="flex flex-col divide-y">
-      <h2 className="text-sm text-muted-foreground p-2.5">Pending Friends</h2>
-      {users.map((user, index) => (
-        <FriendItem key={index} username={user.username} image={user.image}>
+      <h2 className="text-xs font-medium text-muted-foreground p-2.5">
+        Pending Friends
+      </h2>
+      {friends?.length === 0 && (
+        <FriendsListEmpty>
+          You have no pending friend requests.
+        </FriendsListEmpty>
+      )}
+      {friends?.map((friend, index) => (
+        <FriendItem
+          key={index}
+          username={friend.user.username}
+          image={friend.user.image}
+        >
           <IconButton
             className="bg-green-100"
-            title="Accept Friend"
+            title="Accept"
             icon={<CheckIcon />}
+            onClick={() => updateStatus({ id: friend._id, status: "accepted" })}
           />
           <IconButton
             className="bg-red-100"
-            title="Reject Friend"
+            title="Reject"
             icon={<XIcon />}
+            onClick={() => updateStatus({ id: friend._id, status: "rejected" })}
           />
         </FriendItem>
       ))}
@@ -44,21 +49,46 @@ export function PendingFriendsList() {
 }
 
 export function AcceptedFriendsList() {
-  const users = useTestUsers();
+  const friends = useQuery(api.functions.friend.listAccepted);
+  const updateStatus = useMutation(api.functions.friend.updateStatus);
 
   return (
     <div className="flex flex-col divide-y">
-      <h2 className="text-sm text-muted-foreground p-2.5">Accepted Friends</h2>
-      {users.map((user, index) => (
-        <FriendItem key={index} username={user.username} image={user.image}>
-          <IconButton title="Start DM" icon={<MessageCircleIcon />} />
+      <h2 className="text-xs font-medium text-muted-foreground p-2.5">
+        Accepted Friends
+      </h2>
+      {friends?.length === 0 && (
+        <FriendsListEmpty>You have no friends yet.</FriendsListEmpty>
+      )}
+      {friends?.map((friend, index) => (
+        <FriendItem
+          key={index}
+          username={friend.user.username}
+          image={friend.user.image}
+        >
+          <IconButton
+            title="Start DM"
+            icon={<MessageCircleIcon />}
+            onClick={() => {}}
+          />
           <IconButton
             className="bg-red-100"
             title="Remove Friend"
             icon={<XIcon />}
+            onClick={() => updateStatus({ id: friend._id, status: "rejected" })}
+            // when you remove a friend it doesn't delete the friend from the database,
+            // it just changes the status to rejected
           />
         </FriendItem>
       ))}
+    </div>
+  );
+}
+
+function FriendsListEmpty({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="p-4 bg-muted/50 text-center text-sm text-muted-foreground">
+      {children}
     </div>
   );
 }
@@ -67,10 +97,12 @@ function IconButton({
   title,
   className,
   icon,
+  onClick,
 }: {
   title: string;
   className?: string;
   icon: React.ReactNode;
+  onClick?: () => void;
 }) {
   return (
     <Tooltip>
@@ -79,6 +111,7 @@ function IconButton({
           className={cn("rounded-full", className)}
           variant="outline"
           size="icon"
+          onClick={onClick}
         >
           {icon}
           <span className="sr-only">{title}</span>
