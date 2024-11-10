@@ -11,6 +11,7 @@
 - [Convex](https://www.convex.dev/)
 - [Clerk](https://clerk.com/docs)
 - [svix]()
+- [shadcn]()
 
 ## Development Notes
 
@@ -40,6 +41,14 @@ The above code tells the npm run all command to run all the dev: commands. While
     }
 
 When you run a mutation it updates ALL queries automatically
+
+    Shift + Alt + o
+
+the above command will remove any unused import statements from your code
+
+    pnpm add convex-helpers
+
+- [convex-helpers](https://www.npmjs.com/package/convex-helpers) gives higher level utility functions to use in the helpers.ts file
 
 ### Convex Dashboard Tabs
 
