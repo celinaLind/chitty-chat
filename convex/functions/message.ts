@@ -61,3 +61,22 @@ export const create = authenticatedMutation({
     });
   },
 });
+
+// add ability to delete messages
+export const remove = authenticatedMutation({
+  args: {
+    id: v.id("messages"),
+  },
+  handler: async (ctx, { id }) => {
+    const message = await ctx.db.get(id);
+    if (!message) {
+      // verify message exists
+      throw new Error("Message not found");
+    } else if (message.sender !== ctx.user._id) {
+      // only allow the sender to delete the message
+      throw new Error("You do not have permission to delete this message");
+    }
+    // delete the message
+    await ctx.db.delete(id);
+  },
+});

@@ -23,7 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { PlusIcon, User2Icon } from "lucide-react";
 import Link from "next/link";
 import { NewDirectMessage } from "./new-direct-message";
@@ -41,7 +41,7 @@ const useTestUsers = () => {
 
 export function DashboardSidebar() {
   const user = useQuery(api.functions.user.get);
-  const directMessages = useTestUsers();
+  const directMessages = useQuery(api.functions.dm.list);
   const pathname = usePathname();
 
   if (!user) {
@@ -73,7 +73,7 @@ export function DashboardSidebar() {
           <NewDirectMessage />
           <SidebarGroupContent>
             <SidebarMenu>
-              {directMessages.map((dm) => (
+              {directMessages?.map((dm) => (
                 <SidebarMenuItem key={dm._id}>
                   <SidebarMenuButton
                     asChild
@@ -81,10 +81,12 @@ export function DashboardSidebar() {
                   >
                     <Link href={`/dm/${dm._id}`}>
                       <Avatar className="size-6">
-                        <AvatarImage src={dm.image} />
-                        <AvatarFallback>{dm.username[0]}</AvatarFallback>
+                        <AvatarImage src={dm.otherUser.image} />
+                        <AvatarFallback>
+                          {dm.otherUser.username[0]}
+                        </AvatarFallback>
                       </Avatar>
-                      <p className="font-medium">{dm.username}</p>
+                      <p className="font-medium">{dm.otherUser.username}</p>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
