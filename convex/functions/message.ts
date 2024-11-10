@@ -1,6 +1,7 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./helpers";
+import { internal } from "../_generated/api";
 // query is a function that fetches data
 // mutation is a function that modifies data
 
@@ -58,6 +59,11 @@ export const create = authenticatedMutation({
       content,
       directMessage,
       sender: ctx.user._id,
+    });
+    // remove typing indicator RIGHT AFTER after message is sent
+    await ctx.scheduler.runAfter(0, internal.functions.typing.remove, {
+      directMessage,
+      user: ctx.user._id,
     });
   },
 });

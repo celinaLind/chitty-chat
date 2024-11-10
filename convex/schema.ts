@@ -40,4 +40,12 @@ export default defineSchema({
     content: v.string(),
     directMessage: v.id("directMessages"),
   }).index("by_direct_message", ["directMessage"]), // look up messages by direct message id
+  // add a table for typing indicators (know when user already has a typing indicator/is typing in a chat)
+  typingIndicators: defineTable({
+    user: v.id("users"),
+    directMessage: v.id("directMessages"),
+    expiresAt: v.number(),
+  })
+    .index("by_direct_message", ["directMessage"]) // fetch EVERYONE currently typing for that message thread
+    .index("by_user_direct_message", ["user", "directMessage"]), //fetch if specific user is typing in that message thread
 });
