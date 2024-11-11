@@ -1,5 +1,12 @@
 # Chitty Chat
 
+This is a Discord clone currently with the ability to create and account, send and receive friend requests, and send and receive messages and images.
+
+To come:
+
+- Video and Voice Calls
+- Styling updates
+
 ## Table of Contents
 
 - [Tools Used](#tools-used)
