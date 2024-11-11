@@ -13,8 +13,15 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { FunctionReturnType } from "convex/server";
-import { MoreVerticalIcon, SendIcon, TrashIcon } from "lucide-react";
-import React, { use, useState } from "react";
+import {
+  LoaderIcon,
+  MoreVerticalIcon,
+  PlusIcon,
+  SendIcon,
+  TrashIcon,
+} from "lucide-react";
+import Image from "next/image";
+import React, { use, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function MessagePage({
@@ -71,6 +78,15 @@ function MessageItem({ message }: { message: Message }) {
           {message.sender?.username ?? "Deleted User"}
         </p>
         <p className="text-sm font-semibold">{message.content}</p>
+        {message.attachment && (
+          <Image
+            alt="Attachment"
+            src={message.attachment}
+            width={300}
+            height={300}
+            className="rounded border overflow-hidden"
+          />
+        )}
       </div>
       <MessageActions message={message} />
     </div>
@@ -133,15 +149,61 @@ function MessageInput({
   const [content, setContent] = useState("");
   const sendMessage = useMutation(api.functions.message.create);
   const sendTypingIndicator = useMutation(api.functions.typing.upsert);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
+  const [isUploading, setIsUploading] = useState(false);
+  const generateUploadUrl = useMutation(
+    api.functions.message.generateUploadUrl
+  );
+  const attachmentRemoval = useMutation(api.functions.message.removeAttachment);
+  const [attachment, setAttachment] = useState<Id<"_storage">>(); //will either be storage id or undefined
+
+  // TODO: don't allow send when no content or attachment
+  // TODO: implement removeAttachment (doesn't work properly)
+  const removeAttachment = async () => {
+    if (!attachment) {
+      throw new Error("No attachment to remove.");
+    }
+    const thisAttachment = attachment;
+
+    setAttachment(undefined);
+    setFile(undefined);
+    await attachmentRemoval({ attachment: thisAttachment });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFile(file);
+    setIsUploading(true);
+    // generate url
+    const url = await generateUploadUrl();
+    // post image to url
+    const res = await fetch(url, {
+      method: "POST",
+      body: file,
+    });
+    // get storage id from the json response created by the fetch request above
+    const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+    // set the attachment to the storage id
+    setAttachment(storageId);
+    setIsUploading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      if (content.length === 0 && !attachment) {
+        return;
+      }
       await sendMessage({
         directMessage,
         content,
+        attachment,
       });
       setContent("");
+      setAttachment(undefined);
+      setFile(undefined);
     } catch (error) {
       toast.error("Failed to send message.", {
         description:
@@ -150,21 +212,95 @@ function MessageInput({
     }
   };
   return (
-    <form className="flex items-center p-4 gap-2" onSubmit={handleSubmit}>
-      <Input
-        placeholder="Message..."
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        onKeyDown={(e) => {
-          if (content.length > 0) {
-            sendTypingIndicator({ directMessage });
-          }
-        }}
+    <>
+      <form className="flex items-end p-4 gap-2" onSubmit={handleSubmit}>
+        <Button
+          // buttons can have two types: button or submit
+          // the default type is submit
+          // by setting the type to button, the button will not submit the form
+          type="button"
+          size="icon"
+          onClick={() => {
+            fileInput.current?.click();
+          }}
+        >
+          <PlusIcon />
+          <span className="sr-only">Attach</span>
+        </Button>
+        <div className="flex flex-col flex-1 gap-2">
+          {file && (
+            <>
+              {/* <Button
+                size="icon"
+                type="button"
+                onClick={() => removeAttachment}
+              >
+                <TrashIcon />
+                <span className="sr-only">Remove</span>
+              </Button> */}
+              <ImagePreview file={file} isUploading={isUploading} />
+            </>
+          )}
+          <Input
+            placeholder="Message..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (content.length > 0) {
+                sendTypingIndicator({ directMessage });
+              }
+            }}
+          />
+        </div>
+
+        <Button size="icon">
+          <SendIcon />
+          <span className="sr-only">Send</span>
+        </Button>
+      </form>
+      <input
+        type="file"
+        className="hidden"
+        ref={fileInput}
+        // handle when file is selected
+        onChange={handleImageUpload}
+      ></input>
+    </>
+  );
+}
+
+// add image preview
+function ImagePreview({
+  file,
+  isUploading,
+}: {
+  file: File;
+  isUploading: boolean;
+}) {
+  return (
+    <div className="relative max-w-40 max-h-40 overflow-hiddent rounded border">
+      {/* <Button
+        size="icon"
+        className="absolute top-2 right-2"
+        // onClick={() => removeAttachment}
+      >
+        <TrashIcon />
+        <span className="sr-only">Remove</span>
+      </Button> */}
+      <Image
+        src={URL.createObjectURL(file)}
+        alt="Attachment Preview"
+        layout="responsive"
+        width={300}
+        height={300}
+        className="rounded border overflow-hidden"
       />
-      <Button size="icon">
-        <SendIcon />
-        <span className="sr-only">Send</span>
-      </Button>
-    </form>
+      {isUploading && (
+        // tint the image with a black overlay while uploading
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+          <LoaderIcon className="animate-spin size-8 text-white" />
+        </div>
+      )}
+    </div>
   );
 }

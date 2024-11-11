@@ -39,6 +39,9 @@ export default defineSchema({
     sender: v.id("users"),
     content: v.string(),
     directMessage: v.id("directMessages"),
+    attachment: v.optional(v.id("_storage")), //user can attach a file/image to the message
+    // _storage is a storage id provided by convex
+    // optional is used to define a field that may or may not be present
   }).index("by_direct_message", ["directMessage"]), // look up messages by direct message id
   // add a table for typing indicators (know when user already has a typing indicator/is typing in a chat)
   typingIndicators: defineTable({

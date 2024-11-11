@@ -31,8 +31,12 @@ export const list = authenticatedQuery({
     return Promise.all(
       messages.map(async (message) => {
         const sender = await ctx.db.get(message.sender);
+        const attachment = message.attachment
+          ? await ctx.storage.getUrl(message.attachment)
+          : undefined;
         return {
           ...message,
+          attachment,
           sender,
         };
       })
@@ -44,8 +48,9 @@ export const create = authenticatedMutation({
   args: {
     content: v.string(),
     directMessage: v.id("directMessages"),
+    attachment: v.optional(v.id("_storage")),
   },
-  handler: async (ctx, { content, directMessage }) => {
+  handler: async (ctx, { content, attachment, directMessage }) => {
     const member = await ctx.db
       .query("directMessageMembers")
       .withIndex("by_direct_message_user", (q) =>
@@ -57,6 +62,7 @@ export const create = authenticatedMutation({
     }
     await ctx.db.insert("messages", {
       content,
+      attachment,
       directMessage,
       sender: ctx.user._id,
     });
@@ -84,5 +90,31 @@ export const remove = authenticatedMutation({
     }
     // delete the message
     await ctx.db.delete(id);
+    if (message.attachment) {
+      // if there is an attachment delete it from storage
+      await ctx.storage.delete(message.attachment);
+    }
+  },
+});
+
+// generate Upload url for images
+export const generateUploadUrl = authenticatedMutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+// remove attachment from message
+export const removeAttachment = authenticatedMutation({
+  args: {
+    attachment: v.id("_storage"),
+  },
+  handler: async (ctx, { attachment }) => {
+    // const thisAttachment = await ctx.storage.getUrl(attachment);
+    if (!attachment) {
+      throw new Error("Attachment not found");
+    }
+    await ctx.storage.delete(attachment);
+    // return thisAttachment;
   },
 });
