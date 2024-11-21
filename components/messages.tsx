@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import Image from "next/image";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 export function Messages({ id }: { id: Id<"directMessages"> }) {
   const messages = useQuery(api.functions.message.list, {
@@ -120,61 +121,18 @@ function MessageInput({ id }: { id: Id<"directMessages" | "channels"> }) {
   const [content, setContent] = useState("");
   const sendMessage = useMutation(api.functions.message.create);
   const sendTypingIndicator = useMutation(api.functions.typing.upsert);
-  const fileInput = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File>();
-  const [isUploading, setIsUploading] = useState(false);
-  const generateUploadUrl = useMutation(
-    api.functions.storage.generateUploadUrl
-  );
-  const attachmentRemoval = useMutation(api.functions.message.removeAttachment);
-  const [attachment, setAttachment] = useState<Id<"_storage">>(); //will either be storage id or undefined
-
-  // TODO: don't allow send when no content or attachment
-  // TODO: implement removeAttachment (doesn't work properly)
-  const removeAttachment = async () => {
-    if (!attachment) {
-      throw new Error("No attachment to remove.");
-    }
-    const thisAttachment = attachment;
-
-    setAttachment(undefined);
-    setFile(undefined);
-    await attachmentRemoval({ attachment: thisAttachment });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFile(file);
-    setIsUploading(true);
-    // generate url
-    const url = await generateUploadUrl();
-    // post image to url
-    const res = await fetch(url, {
-      method: "POST",
-      body: file,
-    });
-    // get storage id from the json response created by the fetch request above
-    const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
-    // set the attachment to the storage id
-    setAttachment(storageId);
-    setIsUploading(false);
-  };
+  const imageUpload = useImageUpload();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      if (content.length === 0 && !attachment) {
-        return;
-      }
       await sendMessage({
         dmOrChannelId: id,
         content,
-        attachment,
+        attachment: imageUpload.storageId,
       });
       setContent("");
-      setAttachment(undefined);
-      setFile(undefined);
+      imageUpload.reset();
     } catch (error) {
       toast.error("Failed to send message.", {
         description:
@@ -192,14 +150,14 @@ function MessageInput({ id }: { id: Id<"directMessages" | "channels"> }) {
           type="button"
           size="icon"
           onClick={() => {
-            fileInput.current?.click();
+            imageUpload.open();
           }}
         >
           <PlusIcon />
           <span className="sr-only">Attach</span>
         </Button>
         <div className="flex flex-col flex-1 gap-2">
-          {file && (
+          {imageUpload.previewUrl && (
             <>
               {/* <Button
                   size="icon"
@@ -209,7 +167,10 @@ function MessageInput({ id }: { id: Id<"directMessages" | "channels"> }) {
                   <TrashIcon />
                   <span className="sr-only">Remove</span>
                 </Button> */}
-              <ImagePreview file={file} isUploading={isUploading} />
+              <ImagePreview
+                url={imageUpload.previewUrl}
+                isUploading={imageUpload.isUploading}
+              />
             </>
           )}
           <Input
@@ -230,11 +191,7 @@ function MessageInput({ id }: { id: Id<"directMessages" | "channels"> }) {
         </Button>
       </form>
       <input
-        type="file"
-        className="hidden"
-        ref={fileInput}
-        // handle when file is selected
-        onChange={handleImageUpload}
+        {...imageUpload.inputProps} // takes ALL properties in imageUpload.inputProps and applies them to the input element
       ></input>
     </>
   );
@@ -242,10 +199,10 @@ function MessageInput({ id }: { id: Id<"directMessages" | "channels"> }) {
 
 // add image preview
 function ImagePreview({
-  file,
+  url,
   isUploading,
 }: {
-  file: File;
+  url: string;
   isUploading: boolean;
 }) {
   return (
@@ -259,7 +216,7 @@ function ImagePreview({
           <span className="sr-only">Remove</span>
         </Button> */}
       <Image
-        src={URL.createObjectURL(file)}
+        src={url}
         alt="Attachment Preview"
         layout="responsive"
         width={300}
