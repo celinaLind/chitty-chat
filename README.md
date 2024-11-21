@@ -57,6 +57,12 @@ the above command will remove any unused import statements from your code
 
 - [convex-helpers](https://www.npmjs.com/package/convex-helpers) gives higher level utility functions to use in the helpers.ts file
 
+  pnpm tsc --noEmit
+  -- OR --
+  npx tsc --noEmit
+
+The above commands are Typescript checkers to verify that everything has been updated accordingly. Will return nothing if no errors or return a detailed error if any occur.
+
 ### Convex Dashboard Tabs
 
 - Data (all saved data)
