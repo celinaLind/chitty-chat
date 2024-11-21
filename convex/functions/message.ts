@@ -1,31 +1,27 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
-import { authenticatedMutation, authenticatedQuery } from "./helpers";
+import {
+  assertMember,
+  authenticatedMutation,
+  authenticatedQuery,
+} from "./helpers";
 import { internal } from "../_generated/api";
 // query is a function that fetches data
 // mutation is a function that modifies data
 
 export const list = authenticatedQuery({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
   // ctx is the context object that contains the database
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
     // before getting messages verify user is a member
-    const member = await ctx.db
-      .query("directMessageMembers")
-      .withIndex("by_direct_message_user", (q) =>
-        q.eq("directMessage", directMessage).eq("user", ctx.user._id)
-      )
-      .first();
-    if (!member) {
-      throw new Error("You are not a member of this direct message");
-    }
+    await assertMember(ctx, dmOrChannelId);
     // for each message return image, username, and content
     const messages = await ctx.db
       .query("messages")
-      .withIndex("by_direct_message", (q) =>
-        q.eq("directMessage", directMessage)
+      .withIndex("by_dmOrChannelId", (q) =>
+        q.eq("dmOrChannelId", dmOrChannelId)
       )
       .collect();
     return Promise.all(
@@ -47,28 +43,20 @@ export const list = authenticatedQuery({
 export const create = authenticatedMutation({
   args: {
     content: v.string(),
-    directMessage: v.id("directMessages"),
     attachment: v.optional(v.id("_storage")),
+    dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
-  handler: async (ctx, { content, attachment, directMessage }) => {
-    const member = await ctx.db
-      .query("directMessageMembers")
-      .withIndex("by_direct_message_user", (q) =>
-        q.eq("directMessage", directMessage).eq("user", ctx.user._id)
-      )
-      .first();
-    if (!member) {
-      throw new Error("You are not a member of this direct message");
-    }
+  handler: async (ctx, { content, attachment, dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
     await ctx.db.insert("messages", {
       content,
       attachment,
-      directMessage,
+      dmOrChannelId,
       sender: ctx.user._id,
     });
     // remove typing indicator RIGHT AFTER after message is sent
     await ctx.scheduler.runAfter(0, internal.functions.typing.remove, {
-      directMessage,
+      dmOrChannelId,
       user: ctx.user._id,
     });
   },
@@ -94,13 +82,6 @@ export const remove = authenticatedMutation({
       // if there is an attachment delete it from storage
       await ctx.storage.delete(message.attachment);
     }
-  },
-});
-
-// generate Upload url for images
-export const generateUploadUrl = authenticatedMutation({
-  handler: async (ctx) => {
-    return await ctx.storage.generateUploadUrl();
   },
 });
 

@@ -1,18 +1,23 @@
 import { v } from "convex/values";
 import { internalMutation } from "../_generated/server";
-import { authenticatedMutation, authenticatedQuery } from "./helpers";
+import {
+  assertMember,
+  authenticatedMutation,
+  authenticatedQuery,
+} from "./helpers";
 import { internal } from "../_generated/api";
 
 // list all users typing in the current direct message
 export const list = authenticatedQuery({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
     const usersWithTypingIndicators = await ctx.db
       .query("typingIndicators")
-      .withIndex("by_direct_message", (q) =>
-        q.eq("directMessage", directMessage)
+      .withIndex("by_dmOrChannelId", (q) =>
+        q.eq("dmOrChannelId", dmOrChannelId)
       )
       .filter((q) => q.neq(q.field("user"), ctx.user._id)) // exclude the current user
       .collect();
@@ -34,14 +39,15 @@ export const list = authenticatedQuery({
 // update expiration date if user is still typing
 export const upsert = authenticatedMutation({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
     // does user already have a typing indicator?
     const existing = await ctx.db
-      .query("typingIndicators")
-      .withIndex("by_user_direct_message", (q) =>
-        q.eq("user", ctx.user._id).eq("directMessage", directMessage)
+      .query("typingIndicators") // why is the by_user_dmOrChannelId index an issue?
+      .withIndex("by_user_dmOrChannelId", (q) =>
+        q.eq("user", ctx.user._id).eq("dmOrChannelId", dmOrChannelId)
       )
       .unique(); // use unique b/c there is only one typing indicator per user per direct message
 
@@ -54,13 +60,13 @@ export const upsert = authenticatedMutation({
       // if user does not have a typing indicator, create one
       await ctx.db.insert("typingIndicators", {
         user: ctx.user._id,
-        directMessage,
+        dmOrChannelId,
         expiresAt,
       });
     }
     // schedule the remove function to run at the expiration time
     await ctx.scheduler.runAt(expiresAt, internal.functions.typing.remove, {
-      directMessage,
+      dmOrChannelId,
       user: ctx.user._id,
       expiresAt,
     });
@@ -70,17 +76,17 @@ export const upsert = authenticatedMutation({
 // delete typing indicator if user is no longer typing and indicator has expired
 export const remove = internalMutation({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
     user: v.id("users"),
     expiresAt: v.optional(v.number()),
   },
-  handler: async (ctx, { directMessage, user, expiresAt }) => {
+  handler: async (ctx, { dmOrChannelId, user, expiresAt }) => {
     // confirm that the typing indicator exists
     // && that expected expiration date matches the one in the database
     const existing = await ctx.db
       .query("typingIndicators")
-      .withIndex("by_user_direct_message", (q) =>
-        q.eq("user", user).eq("directMessage", directMessage)
+      .withIndex("by_user_dmOrChannelId", (q) =>
+        q.eq("user", user).eq("dmOrChannelId", dmOrChannelId)
       )
       .unique();
     if (existing && (!expiresAt || existing.expiresAt === expiresAt)) {
