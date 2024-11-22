@@ -1,11 +1,12 @@
 # Chitty Chat
 
-This is a Discord clone currently with the ability to create and account, send and receive friend requests, and send and receive messages and images.
+Chitty Chat is a Discord clone a free communication platform that allows users to create communities and groups for a variety of topics, including gaming, education, and more:
 
-To come:
+**_Features_**
+Chitty Chat offers real-time text and voice chat, video calls, and image sharing. Users can communicate privately or in virtual communities called "servers".
 
-- Video and Voice Calls
-- Styling updates
+**_Servers_**
+Servers are collections of chat rooms and voice channels that can be accessed via invite links. Server administrators can customize their servers with features of their choosing
 
 ## Table of Contents
 
@@ -104,6 +105,8 @@ Do following in Convex:
 
 ## To do:
 
+- Fix Runtime Error found if you are on a specific channels page and you delete said channel
+  - when channel is deleted return to default channel page
 - Fix the DM button
   - Click btn > if there is a dm with both users take current user to the dm page > if not create a new dm page
 - Remove/change attachment before message is sent
