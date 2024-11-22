@@ -24,6 +24,8 @@ To come:
 
 Using "Rename Symbol" allows you to rename a function or variable once and for it to be updated everywhere the name is referenced.
 
+"/join" is not included in the dashboard folder because we want users to be able to access the invite page without having to be authenticated/logged in.
+
 ### Commands
 
     pnpm i -D prettier
