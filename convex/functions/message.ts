@@ -1,7 +1,7 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import {
-  assertMember,
+  assertChannelMember,
   authenticatedMutation,
   authenticatedQuery,
 } from "./helpers";
@@ -16,7 +16,7 @@ export const list = authenticatedQuery({
   // ctx is the context object that contains the database
   handler: async (ctx, { dmOrChannelId }) => {
     // before getting messages verify user is a member
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     // for each message return image, username, and content
     const messages = await ctx.db
       .query("messages")
@@ -47,7 +47,7 @@ export const create = authenticatedMutation({
     dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
   handler: async (ctx, { content, attachment, dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     await ctx.db.insert("messages", {
       content,
       attachment,

@@ -35,10 +35,25 @@ export const authenticatedMutation = customMutation(
   })
 );
 
+export const assertServerMember = async (
+  ctx: AuthenicatedQueryCtx,
+  serverId: Id<"servers">
+) => {
+  const serverMember = await ctx.db
+    .query("serverMembers")
+    .withIndex("by_serverId_userId", (q) =>
+      q.eq("serverId", serverId).eq("userId", ctx.user._id)
+    )
+    .unique();
+  if (!serverMember) {
+    throw new Error("You are not a member of this server!");
+  }
+};
+
 // confirm if it is a dm or channel
 // check if the user is a member of the dm or channel
 // An assertion is a fcn that checks if a condition is true and throws an error if it is not.
-export const assertMember = async (
+export const assertChannelMember = async (
   ctx: AuthenicatedQueryCtx,
   dmOrChannelId: Id<"directMessages" | "channels">
 ) => {

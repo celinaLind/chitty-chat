@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation } from "../_generated/server";
 import {
-  assertMember,
+  assertChannelMember,
   authenticatedMutation,
   authenticatedQuery,
 } from "./helpers";
@@ -13,7 +13,7 @@ export const list = authenticatedQuery({
     dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     const usersWithTypingIndicators = await ctx.db
       .query("typingIndicators")
       .withIndex("by_dmOrChannelId", (q) =>
@@ -42,7 +42,7 @@ export const upsert = authenticatedMutation({
     dmOrChannelId: v.union(v.id("directMessages"), v.id("channels")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     // does user already have a typing indicator?
     const existing = await ctx.db
       .query("typingIndicators") // why is the by_user_dmOrChannelId index an issue?
