@@ -94,33 +94,6 @@ export function DMSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  {/* asChild means the sidebarmenubutton will be the dropdown menu trigger */}
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton className="flex items-center">
-                      <Avatar className="size-6">
-                        <AvatarImage src={user!.image} />
-                        <AvatarFallback>{user.username[0]}</AvatarFallback>
-                      </Avatar>
-                      <p className="font-medium">{user.username}</p>
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <SignOutButton />
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarFooter>
     </Sidebar>
   );
 }
