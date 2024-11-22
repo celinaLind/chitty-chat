@@ -1,4 +1,3 @@
-"use client";
 import { Avatar } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -39,7 +38,7 @@ const useTestUsers = () => {
   return [user, user, user, user];
 };
 
-export function DashboardSidebar() {
+export function DMSidebar() {
   const user = useQuery(api.functions.user.get);
   const directMessages = useQuery(api.functions.dm.list);
   const pathname = usePathname();
@@ -49,7 +48,7 @@ export function DashboardSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar className="left-12">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

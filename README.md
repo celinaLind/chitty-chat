@@ -22,6 +22,8 @@ To come:
 
 ## Development Notes
 
+Using "Rename Symbol" allows you to rename a function or variable once and for it to be updated everywhere the name is referenced.
+
 ### Commands
 
     pnpm i -D prettier

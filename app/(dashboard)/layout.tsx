@@ -1,9 +1,9 @@
 "use client";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import { RedirectToSignIn } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated } from "convex/react";
-import { DashboardSidebar } from "./_components/sidebar";
-import { Toaster } from "@/components/ui/sonner";
+import { MainSidebar } from "./main-sidebar";
 
 export default function DashboardLayout({
   children,
@@ -13,11 +13,11 @@ export default function DashboardLayout({
   return (
     <>
       <Authenticated>
-        <SidebarProvider>
-          <DashboardSidebar />
+        <SidebarProvider defaultOpen={false}>
+          <MainSidebar />
           {children}
-          <Toaster />
         </SidebarProvider>
+        <Toaster />
       </Authenticated>
       <Unauthenticated>
         <RedirectToSignIn />
