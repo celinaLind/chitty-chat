@@ -46,7 +46,9 @@ export default defineSchema({
   channels: defineTable({
     name: v.string(),
     serverId: v.id("servers"), //the server the channel belongs to
-  }).index("by_serverId", ["serverId"]), // look up channels by server id
+  })
+    .index("by_serverId", ["serverId"]) // look up channels by server id
+    .index("by_serverId_name", ["serverId", "name"]), // verify channel name is unique within a server
   serverMembers: defineTable({
     serverId: v.id("servers"),
     userId: v.id("users"),

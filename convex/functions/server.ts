@@ -45,22 +45,6 @@ export const get = authenticatedQuery({
   },
 });
 
-// return all channels for server
-export const channels = authenticatedQuery({
-  args: {
-    id: v.id("servers"),
-  },
-  handler: async (ctx, { id }) => {
-    await assertServerMember(ctx, id);
-    const channels = await ctx.db
-      .query("channels")
-      .withIndex("by_serverId", (q) => q.eq("serverId", id))
-      .collect();
-    //do not need to filter/change since channels object houses all the information we need
-    return channels;
-  },
-});
-
 // list out members of channel
 export const members = authenticatedQuery({
   args: {

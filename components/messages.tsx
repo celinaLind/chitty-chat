@@ -1,3 +1,4 @@
+"use client";
 import { Id } from "@/convex/_generated/dataModel";
 import { ScrollArea } from "./ui/scroll-area";
 import { useMutation, useQuery } from "convex/react";
@@ -24,7 +25,11 @@ import { Input } from "./ui/input";
 import Image from "next/image";
 import { useImageUpload } from "@/hooks/use-image-upload";
 
-export function Messages({ id }: { id: Id<"directMessages"> }) {
+export function Messages({
+  id,
+}: {
+  id: Id<"directMessages"> | Id<"channels">;
+}) {
   const messages = useQuery(api.functions.message.list, {
     dmOrChannelId: id,
   });
