@@ -19,6 +19,7 @@ To come:
 - [Clerk](https://clerk.com/docs)
 - [svix]()
 - [shadcn]()
+- [LiveKit](https://livekit.io/)
 
 ## Development Notes
 
@@ -66,6 +67,11 @@ the above command will remove any unused import statements from your code
   npx tsc --noEmit
 
 The above commands are Typescript checkers to verify that everything has been updated accordingly. Will return nothing if no errors or return a detailed error if any occur.
+
+    pnpm add livekit-server-sdk
+    pnpm add @livekit/components-react @livekit/components-styles
+
+Add LiveKit to project
 
 ### Convex Dashboard Tabs
 
