@@ -3,6 +3,6 @@ export function GET(req: Request) {
   // trying to construct the url by itself
   // you need to help it with a full path + "/dms"
   // below is a dynamic variable to work locally and in production
-  const url = new URL("/dms", req.url); //retrieve the rest of the url from the host 'req.url'
+  const url = new URL("/dm", req.url); //retrieve the rest of the url from the host 'req.url'
   return Response.redirect(url);
 }
