@@ -1,5 +1,10 @@
 import { api } from "@/convex/_generated/api";
-import { LiveKitRoom, VideoConference } from "@livekit/components-react";
+import {
+  LiveKitRoom,
+  PreJoin,
+  VideoConference,
+} from "@livekit/components-react";
+import "@livekit/components-styles";
 import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
@@ -30,6 +35,7 @@ export function Voice({ serverId }: { serverId: Id<"servers"> }) {
           serverUrl="wss://chitty-chat-ibl8xlrg.livekit.cloud"
           token={token}
           onDisconnected={() => setOpen(false)}
+          //   data-lk-theme="default" // default theme
         >
           <VideoConference />
         </LiveKitRoom>
