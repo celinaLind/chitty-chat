@@ -1,4 +1,4 @@
-# Chitty Chat
+# Chitty Chat ~ 15 hours
 
 Chitty Chat is a Discord clone a free communication platform that allows users to create communities and groups for a variety of topics, including gaming, education, and more:
 
