@@ -10,6 +10,9 @@ Chitty Chat offers real-time text and voice chat, video calls, and image sharing
 
 Servers are collections of chat rooms and voice channels that can be accessed via invite links. Server administrators can customize their servers with features of their choosing
 
+### Video Walkthrough
+[![Chitty Chat Walkthrough](https://img.youtube.com/vi/C3FguytaLns/0.jpg)](https://www.youtube.com/watch?v=C3FguytaLns)
+
 ## Table of Contents
 
 - [Tools Used](#tools-used)
