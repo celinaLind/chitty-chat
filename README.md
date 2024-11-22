@@ -101,3 +101,12 @@ Do the following within Clerk:
 Do following in Convex:
 
 - Add the "Signing Secret" found in clerk after webhook creation as CLERK_WEBHOOK_SECRET under env variables
+
+## To do:
+
+- Fix the DM button
+  - Click btn > if there is a dm with both users take current user to the dm page > if not create a new dm page
+- Remove/change attachment before message is sent
+- Fix attachment sizing for messages
+- Automatic scroll to the new message current user sends in a chat
+- (optional) Jump to current messages
