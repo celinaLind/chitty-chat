@@ -10,6 +10,19 @@ Chitty Chat offers real-time text and voice chat, video calls, and image sharing
 
 Servers are collections of chat rooms and voice channels that can be accessed via invite links. Server administrators can customize their servers with features of their choosing
 
+***User Can:***
+- Friends
+  - Send/Receive Friend Rquests
+  - Add/Remove Friend
+- Message
+  - Send A DM to a user by searching their username
+  - Messages include text and media options
+- Voice/Video Call
+  - Can have video calls within servers with one friend or many
+- Servers/Channels
+  - Create/Join Server or channels
+  - Can create join links for servers they are the owner of
+
 ### Video Walkthrough
 [![Chitty Chat Walkthrough](https://img.youtube.com/vi/C3FguytaLns/0.jpg)](https://www.youtube.com/watch?v=C3FguytaLns)
 
@@ -26,6 +39,9 @@ Servers are collections of chat rooms and voice channels that can be accessed vi
 - [svix]()
 - [shadcn]()
 - [LiveKit](https://livekit.io/)
+- React
+- Websockets
+- Tailwind
 
 ## Development Notes
 
